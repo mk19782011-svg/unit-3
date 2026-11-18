@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الامتحان الأول - المعلم محمد تيسير الخرشة</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #f0f4f8 0%, #d9e2ec 100%);
+            --card-bg: #ffffff;
+            --primary: #102a43;
+            --accent: #0b69a3;
+            --accent-hover: #035388;
+            --success: #27ab83;
+            --danger: #bb2d3b;
+            --text-main: #243b53;
+            --border: #bcccdc;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Cairo', sans-serif;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .main-wrapper {
+            width: 100%;
+            max-width: 900px;
+            background: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(16, 42, 67, 0.08);
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+            border-top: 6px solid var(--accent);
+        }
+
+        .cover-badge {
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+
+        .header-title {
+            color: var(--primary);
+            font-size: 2.1rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .sub-title {
+            color: #627d98;
+            margin-bottom: 35px;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            text-align: right;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 1.05rem;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            font-size: 1.1rem;
+            outline: none;
+            transition: all 0.3s ease;
+            background: #f8fafc;
+            color: var(--primary);
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--accent);
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(11, 105, 163, 0.12);
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            background-color: var(--accent);
+            color: white;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(11, 105, 163, 0.2);
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            background-color: var(--accent-hover);
+            transform: translateY(-2px);
+        }
+
+        .btn-teacher {
+            background-color: #486581;
+            box-shadow: 0 4px 12px rgba(72, 101, 129, 0.2);
+        }
+
+        .btn-teacher:hover {
+            background-color: #334e68;
+        }
+
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #f0f4f8;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+            font-weight: 700;
+            color: #486581;
+            font-size: 1.05rem;
+        }
+
+        .passage-box {
+            background-color: #f0f4f8;
+            border-right: 5px solid var(--accent);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            font-size: 1.05rem;
+            line-height: 1.85;
+            direction: ltr;
+            text-align: left;
+            color: #102a43;
+        }
+
+        .question-title {
+            font-size: 1.25rem;
+            margin-bottom: 25px;
+            line-height: 1.8;
+            direction: ltr;
+            text-align: left;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            direction: ltr;
+        }
+
+        .option-btn {
+            background: #ffffff;
+            border: 2px solid var(--border);
+            padding: 16px 20px;
+            border-radius: 12px;
+            text-align: left;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: var(--text-main);
+            font-weight: 500;
+        }
+
+        .option-btn:hover {
+            border-color: var(--accent);
+            background: #f0f9ff;
+        }
+
+        .option-btn.selected {
+            border-color: var(--accent);
+            background-color: #e0f2fe;
+            color: #0369a1;
+            font-weight: 700;
+        }
+
+        .nav-btns {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 35px;
+            gap: 15px;
+        }
+
+        .btn-nav {
+            width: 48%;
+            margin-top: 0;
+        }
+
+        .result-box {
+            text-align: center;
+        }
+
+        .score-display {
+            font-size: 4rem;
+            font-weight: 800;
+            color: var(--accent);
+            margin: 20px 0;
+        }
+
+        .review-section {
+            margin-top: 30px;
+            text-align: left;
+            direction: ltr;
+            max-height: 480px;
+            overflow-y: auto;
+            padding-right: 12px;
+        }
+
+        .review-item {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 18px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .review-item.correct { border-left: 6px solid var(--success); }
+        .review-item.incorrect { border-left: 6px solid var(--danger); }
+
+        .correct-ans { color: var(--success); font-weight: bold; }
+        .user-ans { color: var(--danger); font-weight: bold; }
+
+        .warning-msg {
+            color: var(--danger);
+            text-align: center;
+            margin-top: 12px;
+            font-weight: bold;
+            display: none;
+        }
+
+        u { text-decoration: underline; font-weight: bold; }
+        b { font-weight: bold; }
+
+        @media (max-width: 600px) {
+            .main-wrapper { padding: 20px; }
+            .header-title { font-size: 1.6rem; }
+            .score-display { font-size: 3rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="main-wrapper">
+    <!-- 1. شاشة الدخول -->
+    <div id="start-screen">
+        <span class="cover-badge">منصة الامتحانات الإلكترونية</span>
+        <h1 class="header-title">الامتحان الأول - الوحدة الثالثة</h1>
+        <p class="sub-title">إعداد المعلم: محمد تيسير الخرشة</p>
+        
+        <div class="form-group">
+            <label for="student-name">أدخل اسم الطالب الثلاثي للبدء:</label>
+            <input type="text" id="student-name" placeholder="مثال: أحمد محمد علي..." autocomplete="off">
+        </div>
+
+        <button type="button" class="btn" id="start-btn">دخول الامتحان الآن</button>
+        <button type="button" class="btn btn-teacher" id="teacher-btn">لوحة التحكم المعلم 🔒</button>
+        <p id="error-msg" class="warning-msg"></p>
+    </div>
+
+    <!-- 2. شاشة الأسئلة -->
+    <div id="quiz-screen" style="display: none;">
+        <div class="quiz-header">
+            <span>الطالب: <span id="display-student-name"></span></span>
+            <span>السؤال: <span id="current-q-num">1</span> / <span id="total-q-num">47</span></span>
+        </div>
+
+        <div id="passage-container" class="passage-box" style="display: none;"></div>
+        <div id="question-text" class="question-title"></div>
+        <div id="options-container" class="options-container"></div>
+
+        <p id="cheat-warning" class="warning-msg">تنبيه: تم رصد مغادرة الشاشة أو التبويب!</p>
+        <p id="select-warning" class="warning-msg">الرجاء اختيار إجابة صحيحة للانتقال للسؤال التالي!</p>
+
+        <div class="nav-btns">
+            <button type="button" id="prev-btn" class="btn btn-nav" style="display:none;">السابق</button>
+            <button type="button" id="next-btn" class="btn btn-nav">التالي</button>
+        </div>
+    </div>
+
+    <!-- 3. شاشة النتيجة -->
+    <div id="result-screen" style="display: none;" class="result-box">
+        <h2 style="color: var(--primary);">نتيجة الامتحان النهائية</h2>
+        <p id="result-student-name" style="font-size: 1.3rem; margin-top: 10px; font-weight: 700; color: var(--accent);"></p>
+        <div class="score-display" id="score-text">0 / 100</div>
+
+        <h3 style="text-align: right; margin-top: 25px; color: var(--primary);">مراجعة الأسئلة والإجابات النموذجية:</h3>
+        <div id="review-container" class="review-section"></div>
+    </div>
+
+    <!-- 4. شاشة لوحة المعلم -->
+    <div id="teacher-screen" style="display: none;">
+        <h2 style="text-align: center; margin-bottom: 20px; color: var(--primary);">لوحة نتائج الطلاب المسجلة</h2>
+        <div id="results-list" style="max-height: 420px; overflow-y: auto; border: 2px solid var(--border); border-radius: 12px; padding: 15px; background: #f8fafc;">
+            <!-- يتم تحميل النتائج هنا -->
+        </div>
+        <button type="button" class="btn" id="back-btn" style="margin-top: 20px;">العودة لشاشة الدخول</button>
+    </div>
+</div>
+
+<script>
+    // --- إعدادات Firebase ---
+    const firebaseConfig = {
+        databaseURL: "https://YOUR_FIREBASE_PROJECT_ID.firebaseio.com"
+    };
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+    const database = firebase.database();
+
+    // --- الأسئلة الـ 47 كاملة بدقة من ملف exam3.pdf ---
+    const rawQuestions = [
+        {
+            passage: "Most people think that economics is all about money, but in fact, it's far broader than that. Economics is really all about making choices and decisions. These might indeed be related to money. For example, is it more economical to go to a cheaper supermarket if a taxi there and back needs to be included in the cost? However, economic principles, especially those of behavioral economics, can be usefully applied to all areas of our lives.",
+            q: "1: How is economics defined according to the paragraph above?",
+            options: [
+                "As a science concerned exclusively with banking and cash.",
+                "As a field much broader than money, focusing fundamentally on choices and decisions.",
+                "As a set of rules for avoiding public transportation costs.",
+                "As a branch of psychology unrelated to daily life."
+            ],
+            ans: 1
+        },
+        {
+            passage: "Possibly, the first thing we can take from economics is the importance of doing a cost-benefit analysis when making big decisions. Comfortable though we may be with making a list of pros and cons, we should recognise that it is actually a rather ineffective tool. Just one of the cons might easily outweigh all of the pros. A cost-benefit analysis is something altogether more sophisticated, which allows you to be more objective. For example, let's say that you have to decide whether to make a journey by train or aeroplane. The financial cost of each journey is obvious, but there are also other costs to take into account, such as the cost in your time, the cost in terms of how tired you'll be on arrival, the environmental cost and so on. Give each of these a score out of five, and then weigh them up against the potential benefits, scored in the same way, and the choice becomes much easier.",
+            q: "2: In the paragraph above, what does the pronoun \"them\" (in \"and then weigh <u>them</u> up\") refer to?",
+            options: ["Big decisions", "Potential benefits", "The other costs (time, tiredness, environmental cost, etc.)", "Journey choices"],
+            ans: 2
+        },
+        {
+            passage: "There are also certain in-built human biases we ought to bear in mind, for example, something known as 'present bias'. Behavioral economics teaches us that people have a tendency to overvalue immediate rewards over long-term payoffs. A famous study showed that given the choice between receiving less money now, or more money later, most people would choose the former, even though they'd end up less well-off. This is also the reason why people procrastinate, or why you should never go food shopping when you're hungry. Once aware of this propensity however, you can make sure you avoid it. For example, if you put your money in a savings account where you can't get at it easily, you'll overcome the tendency to want to spend it straightaway, rather than wait.",
+            q: "3: What is the primary psychological effect of \"present bias\" on human behavior according to the text above?",
+            options: [
+                "It encourages people to save money for long-term investments.",
+                "It causes individuals to overvalue immediate rewards over long-term payoffs, leading to procrastination.",
+                "It entirely prevents emotional or impulsive decisions.",
+                "It forces people to shop only when they are completely full."
+            ],
+            ans: 1
+        },
+        {
+            passage: "Another trap many people fall into is the sunk-cost fallacy. A fallacy is an idea that is often believed to be true, but which is, in fact, false. The sunk-cost fallacy is the idea that because you have already invested time or money in something, you should persist with it no matter what.",
+            q: "4: What does the \"sunk-cost fallacy\" lead people to believe according to the paragraph above?",
+            options: [
+                "That past investments of time or money mean you should persist with something no matter what.",
+                "That all investments should be canceled at the very first sign of trouble.",
+                "That traditional pros and cons lists are mathematically perfect.",
+                "That free products always carry hidden financial fees."
+            ],
+            ans: 0
+        },
+        {
+            passage: "One study which demonstrated this tendency asked people to imagine they were at a birthday celebration and that they were offered chocolate cake. The researchers told some people this was from a local supermarket, and others that it was an expensive handmade cake from a shop almost an hour away. Having been told the cake had required a significant investment of time and money seemed to make people much more likely to eat it all, even though they felt uncomfortably full, or weren't that keen on chocolate cake. The sunk-cost fallacy often leads us to do things which are really against our best interests. For example, maintaining a friendship with someone we don't really like anymore, because we have known them a long time, and feel that nothing can be done about it. Or persisting with a business idea, even when it isn't working and is actually losing us money. Our decision-making ability can be dramatically improved by recognising when we may be falling prey to this fallacy.",
+            q: "5: In the paragraph above, what does the pronoun \"it\" (in \"even when <u>it</u> isn't working and is actually losing us money\") refer to?",
+            options: ["The friendship", "A business idea", "The chocolate cake", "The sunk-cost fallacy"],
+            ans: 1
+        },
+        {
+            passage: "Even when we've made a good decision, we should also be aware of the law of diminishing returns. This economic concept states that after a certain point, investing more money (or effort) does not lead to increased benefits, and, notwithstanding the objective risk, may even have an adverse impact. For example, if you get your friends round to help you decorate your room. To begin with, having more people to help seems constructive, but if you invite too many friends round, you'll end up with a problem: imagine 20 or 30 people all trying to paint the same room at the same time! This law can also be applied to eating pizza; the first few slices are great, but after that, it becomes less and less palatable, and if you kept going, you might even feel nauseous. This principle might seem obvious, but it is really a reminder that doing your best is good enough. If you keep pushing and trying to do even more, you'll end up subject to the law of diminishing returns.",
+            q: "6: What does the \"law of diminishing returns\" state about investing extra money or effort after a certain point?",
+            options: [
+                "It guarantees exponential success and maximum productivity.",
+                "It does not lead to increased benefits and may even cause adverse impacts.",
+                "It eliminates all objective risks in daily decision-making.",
+                "It forces friends to collaborate more efficiently."
+            ],
+            ans: 1
+        },
+        {
+            passage: "Finally, be aware that, according to economists, there's no such thing as a free lunch. Apparently, this expression comes from a time when it was common to give away lunch when you bought a soft drink. The lunch would be made as salty as possible, so you'd end up spending far more than anticipated on (expensive) beverages. Nowadays, it's worth considering this concept when it comes to free social media sites: watch for the snare if you aren't paying for a product, you ARE the product.",
+            q: "7: What is the underlying meaning of the phrase \"if you aren't paying for a product, you ARE the product\" regarding free social media sites?",
+            options: [
+                "Users get completely free services without any compromise.",
+                "Platforms trade user attention, data, and engagement instead of direct monetary fees.",
+                "Social media companies lose money on every active account.",
+                "Free lunches are provided to active online users."
+            ],
+            ans: 1
+        },
+        { q: "8. They're giving away free toys with children's meals as a part of a sale _______", options: ["investment", "gimmick", "start", "buy"], ans: 1 },
+        { q: "9. So, what gave you the idea to <u>\"start\"</u> the business?", options: ["break into", "pass up", "set up", "sign up"], ans: 2 },
+        { q: "10. A feature of a product or service which makes it different from the rest", options: ["USP", "venture", "quote", "launch"], ans: 0 },
+        { q: "11. The price _______ is missing. How much is it?", options: ["tag", "quote", "goods", "effective"], ans: 0 },
+        { q: "12. Issa took out a loan to set up his business, so now he _______ the bank money every month.", options: ["refunds", "values", "owes", "budgets"], ans: 2 },
+        { q: "13. I'm not always very _______ when I meet new people. It takes me time to feel safe.", options: ["trusting", "naive", "shrewd", "gullible"], ans: 0 },
+        { q: "14. She _______ the child into cleaning her teeth.", options: ["enticed", "coaxed", "incited", "urged"], ans: 1 },
+        { q: "15. You can usually find a good price if you _______ for the best deal.", options: ["mooch around", "run", "shop around", "display"], ans: 2 },
+        { q: "16. A new business project that involves taking risks", options: ["bespoke", "venture", "turnover", "cost-effective"], ans: 1 },
+        { q: "17. They _______ her into leaving her job with promises of a better salary.", options: ["cajoled", "urged", "enticed", "coaxed"], ans: 2 },
+        { q: "18. He was wearing a _______ suit which clearly wasn't cheap.", options: ["bespoke", "bargain basement", "concept", "launch"], ans: 0 },
+        { q: "19. Suha made so much money in her business that she _______ her younger brother's new business.", options: ["discounted", "financed", "budgeted", "refunded"], ans: 1 },
+        { q: "20. Just one of the cons might easily <u>\"outweigh\"</u> all the pros.", options: ["add up", "cancel out", "increase", "improve"], ans: 1 },
+        { q: "21. My cousin has always been a _______ businesswoman and runs several companies now.", options: ["trusting", "naive", "gullible", "shrewd"], ans: 3 },
+        { q: "22. It was too good an opportunity to <u>\"fail to take advantage of\"</u>.", options: ["set up", "sign up", "break into", "pass up"], ans: 3 },
+        { q: "23. The company's profit _______ are low this year, so they will be hoping for better sales next year.", options: ["spree", "margins", "gimmicks", "impulse"], ans: 1 },
+        { q: "24. Another trap is the sunk-cost <u>\"fallacy\"</u>.", options: ["pitfall", "way", "advantage", "tool"], ans: 0 },
+        { q: "25. In 1925, the Eiffel Tower in Paris was sold to a _______ businessman by Victor Lustig, an American conman.", options: ["gullible", "naive", "shrewd", "ingenious"], ans: 0 },
+        { q: "26. It's much cheaper to _______ in bulk if you have a place to put it.", options: ["stock up", "go on", "carry", "buy"], ans: 0 },
+        { q: "27. If you have positive word-of-_______ you may not need to advertise.", options: ["reputation", "-mouth", "up", "tag"], ans: 1 },
+        { q: "28. They are preparing the documents for you.", options: ["The documents prepare for you.", "The documents are being prepare for you.", "The documents are being prepared for you.", "The documents were being prepared for you."], ans: 2 },
+        { q: "29. Engineers developed the first fully electric vehicle in 2013.", options: ["The first fully electric vehicle develops in 2013.", "The first fully electric vehicle was develop in 2013.", "The first fully electric vehicle is developed in 2013.", "The first fully electric vehicle was developed in 2013."], ans: 3 },
+        { q: "30. They have taken all of your suggestions into account.", options: ["All of your suggestions were taken into account.", "All of your suggestions have been taken into account.", "All of your suggestions are taken into account.", "All of your suggestions had been taken into account."], ans: 1 },
+        { q: "31. I expect _______ by my family.", options: ["to help", "being helped", "to be helped", "help"], ans: 2 },
+        { q: "32. I want to clean the car. I want _______", options: ["the car cleaning", "be cleaned", "to clean by the car", "the car to be cleaned"], ans: 3 },
+        { q: "33. Issa is expecting the manager to give him a pay rise. Issa is expecting _______", options: ["to give a pay rise", "being given a pay rise", "to be given a pay rise", "given a pay rise"], ans: 2 },
+        { q: "34. I don't mind you helping me. I don't mind _______", options: ["being helped", "to be helped", "help me", "helping me"], ans: 3 },
+        { q: "35. The kitchen needs cleaning. The kitchen _______", options: ["needs to be cleaned", "needs cleaning by", "is needing cleaned", "has needed cleaning"], ans: 0 },
+        { q: "36. I'd appreciate the concept _______ once again.", options: ["to explain", "being explained", "explain", "explained"], ans: 1 },
+        { q: "37. We will prosecute all shoplifters. All _______", options: ["shoplifters prosecuted.", "shoplifters will be prosecuted.", "shoplifters have been prosecuted.", "shoplifters are prosecuting."], ans: 1 },
+        { q: "38. People think that shopping will always be a social experience. It _______", options: ["is thinking that shopping will always be a social experience.", "is thought that shopping will always be a social experience.", "has been thought that shopping will always be a social experience.", "was thought that shopping will always be a social experience."], ans: 1 },
+        { q: "39. An unknown person had added too much salt to the food.", options: ["Too much salt had been added to the food.", "Too much salt was added to the food.", "Too much salt has been added to the food.", "Too much salt is added to the food."], ans: 0 },
+        { q: "40. People are hardly ever aware of their unconscious biases.", options: ["Their unconscious biases are hardly ever aware.", "Not possible in the passive as there is no main verb.", "Their unconscious biases hardly ever are aware.", "Their unconscious biases are hardly ever being aware."], ans: 1 },
+        { q: "41. The crisis will result in closing more and more shops. The crisis will result in _______", options: ["more and more shops closed down", "more and more shops being closed down", "more and more shops be closed down", "more and more shops have closed down"], ans: 1 },
+        { q: "42. It is often difficult _______ the outside world when you're in a shopping mall.", options: ["seeing", "to see", "see", "saw"], ans: 1 },
+        { q: "43. This is because they _______ to make people lose track of time.", options: ["have / have been", "design", "designed", "designing"], ans: 2 },
+        { q: "44. Designers of early shopping malls simply wanted shopping to _______ as a social event.", options: ["be experienced", "experiencing", "experience", "experienced"], ans: 0 },
+        { q: "45. I have been shown the plans for the new shopping mall.", options: ["The plans for the new shopping mall have shown to me.", "The plans for the new shopping mall has been showing to me.", "The plans for the new shopping mall was shown to me.", "The plans for the new shopping mall have been shown to me."], ans: 3 },
+        { q: "46. All the customers were given a freebie.", options: ["A freebie were given to all the customers.", "A freebie was given to all the customers.", "A freebie was give to all the customers.", "A freebie gave to all the customers."], ans: 1 },
+        { q: "47. Why is the passive used here? \"A fallacy is an idea that is often believed to be true.\"", options: ["We want to sound more objective or talk about general opinions.", "We want to avoid personal responsibility or blame.", "We are more interested in the action than who does it.", "It is better not to start a sentence with a long complex subject."], ans: 0 }
+    ];
+
+    let questions = [];
+    let currentQ = 0;
+    let userAnswers = {};
+    let studentName = "";
+    let cheatCount = 0;
+
+    function shuffleArray(array) {
+        let curId = array.length;
+        while (0 !== curId) {
+            let randId = Math.floor(Math.random() * curId);
+            curId -= 1;
+            let tmp = array[curId];
+            array[curId] = array[randId];
+            array[randId] = tmp;
+        }
+        return array;
+    }
+
+    // ربط الأزرار بطريقة برمجية آمنة (Event Listeners) لضمان العمل 100%
+    document.addEventListener("DOMContentLoaded", function() {
+        document.getElementById("start-btn").addEventListener("click", startQuiz);
+        document.getElementById("teacher-btn").addEventListener("click", openTeacherDashboard);
+        document.getElementById("next-btn").addEventListener("click", nextQuestion);
+        document.getElementById("prev-btn").addEventListener("click", prevQuestion);
+        document.getElementById("back-btn").addEventListener("click", closeTeacherDashboard);
+    });
+
+    function startQuiz() {
+        const nameInput = document.getElementById('student-name').value.trim();
+        const errorMsg = document.getElementById('error-msg');
+
+        if (!nameInput) {
+            errorMsg.innerText = "يرجى كتابة اسم الطالب الثلاثي للبدء!";
+            errorMsg.style.display = "block";
+            return;
+        }
+
+        studentName = nameInput;
+        errorMsg.style.display = "none";
+        questions = shuffleArray([...rawQuestions]);
+
+        document.getElementById('start-screen').style.display = 'none';
+        document.getElementById('quiz-screen').style.display = 'block';
+        document.getElementById('display-student-name').innerText = studentName;
+        document.getElementById('total-q-num').innerText = questions.length;
+
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        const qData = questions[currentQ];
+        document.getElementById('current-q-num').innerText = currentQ + 1;
+        document.getElementById('select-warning').style.display = 'none';
+
+        const passageBox = document.getElementById('passage-container');
+        if (qData.passage) {
+            passageBox.innerHTML = qData.passage;
+            passageBox.style.display = 'block';
+        } else {
+            passageBox.style.display = 'none';
+        }
+
+        document.getElementById('question-text').innerHTML = qData.q;
+
+        const optContainer = document.getElementById('options-container');
+        optContainer.innerHTML = '';
+
+        qData.options.forEach((optText, index) => {
+            const btn = document.createElement('button');
+            btn.type = "button";
+            btn.className = 'option-btn';
+            if (userAnswers[currentQ] === index) {
+                btn.classList.add('selected');
+            }
+            btn.innerHTML = `<b style="margin-right: 8px;">${String.fromCharCode(65 + index)})</b> ${optText}`;
+            btn.addEventListener("click", () => selectOption(index));
+            optContainer.appendChild(btn);
+        });
+
+        document.getElementById('prev-btn').style.display = currentQ === 0 ? 'none' : 'block';
+        document.getElementById('next-btn').innerText = (currentQ === questions.length - 1) ? 'إنهاء الامتحان وإظهار النتيجة' : 'التالي';
+    }
+
+    function selectOption(index) {
+        userAnswers[currentQ] = index;
+        document.getElementById('select-warning').style.display = 'none';
+        loadQuestion();
+    }
+
+    function prevQuestion() {
+        if (currentQ > 0) {
+            currentQ--;
+            loadQuestion();
+        }
+    }
+
+    function nextQuestion() {
+        if (userAnswers[currentQ] === undefined) {
+            document.getElementById('select-warning').style.display = 'block';
+            return;
+        }
+
+        if (currentQ < questions.length - 1) {
+            currentQ++;
+            loadQuestion();
+        } else {
+            finishQuiz();
+        }
+    }
+
+    function finishQuiz() {
+        let correctCount = 0;
+        questions.forEach((q, idx) => {
+            if (userAnswers[idx] === q.ans) {
+                correctCount++;
+            }
+        });
+
+        const finalScore = (correctCount / questions.length) * 100;
+
+        document.getElementById('quiz-screen').style.display = 'none';
+        document.getElementById('result-screen').style.display = 'block';
+        document.getElementById('result-student-name').innerText = `الطالب: ${studentName}`;
+        document.getElementById('score-text').innerText = `${finalScore.toFixed(0)} / 100`;
+
+        saveResultToFirebase(studentName, finalScore, cheatCount);
+        displayReview();
+    }
+
+    function displayReview() {
+        const reviewContainer = document.getElementById('review-container');
+        reviewContainer.innerHTML = '';
+
+        questions.forEach((q, idx) => {
+            const userAnsIndex = userAnswers[idx];
+            const isCorrect = userAnsIndex === q.ans;
+
+            const div = document.createElement('div');
+            div.className = `review-item ${isCorrect ? 'correct' : 'incorrect'}`;
+            
+            let userAnsText = userAnsIndex !== undefined ? q.options[userAnsIndex] : "لم تتم الإجابة";
+            let correctAnsText = q.options[q.ans];
+
+            div.innerHTML = `
+                <p style="margin-bottom: 8px;"><strong>السؤال ${idx + 1}:</strong> ${q.q}</p>
+                <p>إجابتك: <span class="${isCorrect ? 'correct-ans' : 'user-ans'}">${userAnsText}</span></p>
+                ${!isCorrect ? `<p>الإجابة الصحيحة: <span class="correct-ans">${correctAnsText}</span></p>` : ''}
+            `;
+            reviewContainer.appendChild(div);
+        });
+    }
+
+    function saveResultToFirebase(name, score, cheatAttempts) {
+        try {
+            database.ref('exam3_results/').push({
+                studentName: name,
+                score: score,
+                cheatAttempts: cheatAttempts,
+                timestamp: new Date().toLocaleString('ar-JO')
+            });
+        } catch (e) {
+            console.log("Firebase Error:", e);
+        }
+    }
+
+    document.addEventListener("visibilitychange", function() {
+        if (document.hidden && document.getElementById('quiz-screen').style.display === 'block') {
+            cheatCount++;
+            document.getElementById('cheat-warning').style.display = 'block';
+        }
+    });
+
+    function openTeacherDashboard() {
+        const pass = prompt("أدخل رمز المرور للوحة المعلم:");
+        if (pass === "MK1978mk") {
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('teacher-screen').style.display = 'block';
+            loadTeacherData();
+        } else if (pass !== null) {
+            alert("رمز المرور غير صحيح!");
+        }
+    }
+
+    function closeTeacherDashboard() {
+        document.getElementById('teacher-screen').style.display = 'none';
+        document.getElementById('start-screen').style.display = 'block';
+    }
+
+    function loadTeacherData() {
+        const listContainer = document.getElementById('results-list');
+        listContainer.innerHTML = '<p style="text-align: center;">جاري جلب النتائج...</p>';
+
+        database.ref('exam3_results/').once('value').then((snapshot) => {
+            listContainer.innerHTML = '';
+            if (!snapshot.exists()) {
+                listContainer.innerHTML = '<p style="text-align: center; color: #627d98;">لا توجد نتائج مسجلة حتى الآن.</p>';
+                return;
+            }
+
+            snapshot.forEach((child) => {
+                const data = child.val();
+                const item = document.createElement('div');
+                item.style.padding = '12px';
+                item.style.borderBottom = '1px solid #e2e8f0';
+                item.style.textAlign = 'right';
+                item.innerHTML = `
+                    <strong>الطالب:</strong> ${data.studentName} | 
+                    <strong>العلامة:</strong> ${data.score} / 100 | 
+                    <strong>مغادرة الشاشة:</strong> ${data.cheatAttempts || 0} مرات | 
+                    <small style="color: #627d98;">(${data.timestamp})</small>
+                `;
+                listContainer.appendChild(item);
+            });
+        }).catch((err) => {
+            listContainer.innerHTML = '<p style="text-align: center; color: red;">تعذر الاتصال بقاعدة البيانات.</p>';
+        });
+    }
+</script>
+
+</body>
+</html>
